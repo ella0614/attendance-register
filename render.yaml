@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: attendance-tracker
+    runtime: python
+    plan: free
+    buildCommand: python -m compileall -q server.py
+    startCommand: python server.py
+    healthCheckPath: /api/health
+    envVars:
+      - key: ATTENDANCE_HOST
+        value: 0.0.0.0
+      - key: ATTENDANCE_DB
+        value: /tmp/attendance.sqlite3
+      - key: ATTENDANCE_COOKIE_SECURE
+        value: "1"
+      - key: ATTENDANCE_ADMIN_EMAIL
+        sync: false
+      - key: ATTENDANCE_ADMIN_PASSWORD
+        sync: false

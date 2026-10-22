@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Management Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="management-dashboard-page">
+    <div class="management-shell">
+        <aside class="management-sidebar">
+            <div class="brand">HiiTPLC</div>
+            <nav class="sidebar-nav">
+                <a class="active" href="#overview">Overview</a>
+                <a href="#attendance">Attendance</a>
+                <a href="#reports">Reports</a>
+            </nav>
+        </aside>
+
+        <main class="management-main">
+            <header class="management-header" id="overview">
+                <div>
+                    <p class="mini-label">Management</p>
+                    <h1>Dashboard</h1>
+                </div>
+                <a href="index.html" class="logout-link" data-logout>Logout</a>
+            </header>
+
+            <section class="summary-row">
+                <div class="summary-card">
+                    <span>Total Staff</span>
+                    <strong id="totalStaffCount">—</strong>
+                    <small>Registered staff</small>
+                </div>
+                <div class="summary-card accent">
+                    <span>Present</span>
+                    <strong id="presentStaffCount">—</strong>
+                    <small>Checked in today</small>
+                </div>
+                <div class="summary-card">
+                    <span>Absent</span>
+                    <strong id="absentStaffCount">—</strong>
+                    <small>Not checked in today</small>
+                </div>
+            </section>
+
+            <section class="content-grid">
+                <div class="panel" id="attendance">
+                    <div class="panel-title-row">
+                        <h2>Today's Attendance</h2>
+                        <span class="panel-chip">Live</span>
+                    </div>
+
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Status</th>
+                                <th>Check in</th>
+                                <th>Check out</th>
+                            </tr>
+                        </thead>
+                        <tbody id="managementAttendanceRows"></tbody>
+                    </table>
+                </div>
+
+                <div class="panel" id="reports">
+                    <div class="panel-title-row">
+                        <h2>Overview</h2>
+                    </div>
+                    <ul class="info-list">
+                        <li>Morning check-in is stable.</li>
+                        <li>Two staff members need reminders.</li>
+                        <li>One employee is marked absent.</li>
+                        <li>Attendance is tracking well this week.</li>
+                    </ul>
+                </div>
+            </section>
+        </main>
+    </div>
+    <script src="app.js"></script>
+</body>
+</html>

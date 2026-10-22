@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Staff Dashboard | Attendance</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="staff-dashboard-page">
+    <section class="staff-dashboard">
+        <div class="dashboard-links">
+            <a href="#dashboard">Dashboard</a>
+            <a href="#attendance-records">Attendance records</a>
+            <a href="#reports">Reports</a>
+            <a href="index.html" data-logout>Logout</a>
+        </div>
+
+        <div class="staff-dashboard-main">
+            <div class="container" id="dashboard">
+                <h1>Staff Attendance</h1>
+                <p>Welcome, <strong id="staffName">Staff member</strong>. Manage your daily attendance here.</p>
+                <!-- Additional content for the staff dashboard can be added here -->
+            </div>
+
+            <div class="check-in-button" id="attendance-checkin">
+                <h1>Attendance Check-In</h1>
+                <p>Click the button below to check in for today.</p>
+                <p id="staffAttendanceStatus" aria-live="polite">Loading attendance…</p>
+                <p id="staffAttendanceTime"></p>
+                <p id="staffAttendanceMessage" role="status"></p>
+                <button id="checkInButton" disabled>Check In</button>
+                <button id="checkOutButton" disabled>Check Out</button>
+            </div>
+
+            <div class="container" id="attendance-records">
+                <!-- Dashboard content goes here -->
+                <h1>Attendance Records</h1>
+                <p>Recent Activity</p>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Staff Name</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="staffAttendanceRows"></tbody>
+                </table>
+            </div>
+
+            <div class="container" id="reports">
+                <h1>Reports</h1>
+                <p id="staffMonthlySummary">Loading monthly attendance summary…</p>
+            </div>
+        </div>
+    </section>
+
+    <script src="app.js"></script>
+</body>
+</html>

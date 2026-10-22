@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Staff Sign Up | Attendance Tracker</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="split-layout">
+        <aside class="image-panel">
+            <div class="image-overlay"></div>
+            <div class="image-content">
+                <span class="eyebrow">HiiTPLC</span>
+                <h1>Join the team</h1>
+                <p>Create a staff account to record attendance and view your daily status.</p>
+            </div>
+        </aside>
+
+        <main class="content-panel">
+            <div class="signup-box">
+                <p class="top-label">Get started</p>
+                <h2>Create your staff account</h2>
+                <form id="signupForm">
+                    <div class="mb-3 text-start">
+                        <label for="signupName" class="form-label">Full name</label>
+                        <input type="text" class="form-control" id="signupName" autocomplete="name" required>
+                    </div>
+                    <div class="mb-3 text-start">
+                        <label for="signupEmail" class="form-label">Email address</label>
+                        <input type="email" class="form-control" id="signupEmail" autocomplete="email" required>
+                    </div>
+                    <div class="mb-3 text-start">
+                        <label for="signupPassword" class="form-label">Password</label>
+                        <input type="password" class="form-control" id="signupPassword" autocomplete="new-password" required>
+                        <div class="form-text">Use 8–20 letters and numbers.</div>
+                    </div>
+                    <div class="mb-3 text-start">
+                        <label for="confirmPassword" class="form-label">Confirm password</label>
+                        <input type="password" class="form-control" id="confirmPassword" autocomplete="new-password" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Create account</button>
+                    <p id="signupMessage" class="signup-message" role="status" aria-live="polite"></p>
+                </form>
+                <p class="signup-note">Already have an account? <a href="staff.html">Sign in</a></p>
+                <p class="signup-disclaimer">Your account details are stored by the attendance server.</p>
+            </div>
+        </main>
+    </div>
+    <script src="app.js"></script>
+</body>
+</html>
