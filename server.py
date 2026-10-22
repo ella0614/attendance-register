@@ -328,8 +328,8 @@ class AttendanceHandler(SimpleHTTPRequestHandler):
 
 def main() -> None:
     initialize_database()
-    host = os.environ.get("ATTENDANCE_HOST", "127.0.0.1")
-    port = int(os.environ.get("PORT", os.environ.get("ATTENDANCE_PORT", "8000")))
+    host = os.environ.get("ATTENDANCE_HOST", "0.0.0.0")
+    port = int(os.environ.get("PORT", "8000"))
     admin_email = os.environ.get("ATTENDANCE_ADMIN_EMAIL", "").strip()
     if not admin_email or not os.environ.get("ATTENDANCE_ADMIN_PASSWORD"):
         print("Management sign-in is disabled. Set ATTENDANCE_ADMIN_EMAIL and ATTENDANCE_ADMIN_PASSWORD to enable it.")
