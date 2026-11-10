@@ -9,10 +9,10 @@ Open PowerShell in this folder and start the server:
 ```powershell
 $env:ATTENDANCE_ADMIN_EMAIL = "manager@example.com"
 $env:ATTENDANCE_ADMIN_PASSWORD = "ChooseAUniquePassword123"
-& "C:\Python314\python.exe" server.py
+python server.py
 ```
 
-Open http://127.0.0.1:8000 in your browser. Keep the terminal running while using the website. Stop the server with Ctrl+C. The management email/password are configured through environment variables and are not created by public signup. Staff members can register through the signup page.
+Open http://127.0.0.1:8000 in your browser. Keep the terminal running while using the website. Stop the server with Ctrl+C. The management email/password are configured through environment variables and are not created by public signup. This configured account is the owner: use it to create or revoke individual management accounts from the management dashboard. Other managers cannot manage accounts. Staff members can register through the signup page.
 
 The SQLite database is created automatically in `.attendance-data/attendance.sqlite3`. Back it up to preserve user accounts and attendance records. Change the management password by stopping the server, setting the new `ATTENDANCE_ADMIN_PASSWORD`, and starting it again.
 
@@ -25,8 +25,9 @@ The SQLite database is created automatically in `.attendance-data/attendance.sql
 - `GET /api/attendance/today` — staff member's attendance and recent records
 - `POST /api/attendance/check-in` and `/api/attendance/check-out` — record attendance
 - `GET /api/management/attendance` — management-only attendance overview
+- `GET /api/management/users`, `POST /api/management/users`, and `DELETE /api/management/users?id=<id>` — owner-only management account administration
 
-This backend is intended as a local/demo starting point. Passwords are stored as salted PBKDF2 hashes, not plaintext. Management signup is intentionally disabled.
+This backend is intended as a local/demo starting point. Passwords are stored as salted PBKDF2 hashes, not plaintext. Public management signup is intentionally disabled; only the configured owner can provision named management accounts.
 
 ## Free demo deployment from GitHub with Render
 
@@ -37,6 +38,7 @@ GitHub Pages only serves static files; it cannot run this Python backend. The in
 3. Add the repository URL as the `origin` remote, then push the `main` branch to GitHub.
 4. In Render, choose **New → Blueprint**, connect the GitHub repository, and deploy the detected `render.yaml`. Confirm the service plan is **Free**; do not add a paid disk.
 5. When prompted for `ATTENDANCE_ADMIN_EMAIL` and `ATTENDANCE_ADMIN_PASSWORD`, enter the management login you want. Set a long, unique password; never put credentials in source files or commit them.
-6. Open the Render service URL after deployment. Use `/` for the site and `/api/health` to check that the service and database are responding.
+6. Open the Render service URL after deployment and sign in with the configured owner account. Use the **Management accounts** panel to add one login per manager and revoke access when someone no longer needs it. Never share the owner login.
+7. Use `/` for the site and `/api/health` to check that the service and database are responding.
 
 The backend and static website are served from the same origin, so login cookies and API calls work without extra CORS configuration. For a production attendance system, use persistent managed storage, backups, rate limiting, and stronger operational monitoring.

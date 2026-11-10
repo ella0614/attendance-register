@@ -288,6 +288,66 @@ body {
     line-height: 2;
 }
 
+.management-accounts-panel {
+    margin-top: 20px;
+}
+
+.management-accounts-help {
+    color: #5e7085;
+    line-height: 1.6;
+}
+
+.management-accounts-form {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) auto;
+    align-items: end;
+    gap: 14px;
+    margin: 20px 0 12px;
+}
+
+.management-accounts-form label {
+    display: block;
+    margin-bottom: 6px;
+    color: #2e4663;
+    font-size: 0.85rem;
+    font-weight: 700;
+}
+
+.management-accounts-form input {
+    width: 100%;
+    min-height: 42px;
+    padding: 8px 10px;
+    border: 1px solid #cbd6e2;
+    border-radius: 8px;
+    color: #102b46;
+    font: inherit;
+}
+
+.management-account-button {
+    min-height: 40px;
+    padding: 8px 12px;
+    border: 0;
+    border-radius: 8px;
+    background: #123d6f;
+    color: #ffffff;
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.management-account-button.danger {
+    background: #a83242;
+}
+
+.management-account-button:disabled {
+    cursor: wait;
+    opacity: 0.65;
+}
+
+.management-accounts-table {
+    overflow-x: auto;
+}
+
 @media (max-width: 820px) {
     .management-shell {
         display: block;
@@ -304,6 +364,10 @@ body {
 
     .summary-row,
     .content-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .management-accounts-form {
         grid-template-columns: 1fr;
     }
 }

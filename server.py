@@ -11,7 +11,7 @@ from datetime import datetime, timedelta, timezone
 from contextlib import contextmanager
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
-from urllib.parse import unquote, urlparse
+from urllib.parse import parse_qs, unquote, urlparse
 
 BASE_DIR = Path(__file__).resolve().parent
 DB_PATH = Path(os.environ.get("ATTENDANCE_DB", BASE_DIR / ".attendance-data" / "attendance.sqlite3"))
@@ -154,6 +154,17 @@ class AttendanceHandler(SimpleHTTPRequestHandler):
             return None
         return user
 
+    def is_owner(self, user: sqlite3.Row) -> bool:
+        owner_email = os.environ.get("ATTENDANCE_ADMIN_EMAIL", "").strip().lower()
+        return bool(owner_email) and user["email"].lower() == owner_email
+
+    def require_owner(self) -> sqlite3.Row | None:
+        user = self.require_user("management")
+        if user and not self.is_owner(user):
+            self.send_json(403, {"error": "Only the configured account owner can manage management accounts."})
+            return None
+        return user
+
     def do_GET(self) -> None:
         path = urlparse(self.path).path
         if path == "/api/health":
@@ -169,7 +180,7 @@ class AttendanceHandler(SimpleHTTPRequestHandler):
             if not user:
                 self.send_json(401, {"error": "Not signed in."})
                 return
-            self.send_json(200, {"user": dict(user)})
+            self.send_json(200, {"user": {**dict(user), "isOwner": self.is_owner(user)}})
             return
         if path == "/api/attendance/today":
             user = self.require_user("staff")
@@ -182,6 +193,18 @@ class AttendanceHandler(SimpleHTTPRequestHandler):
             if not user:
                 return
             self.send_management_attendance()
+            return
+        if path == "/api/management/users":
+            if not self.require_owner():
+                return
+            owner_email = os.environ.get("ATTENDANCE_ADMIN_EMAIL", "").strip().lower()
+            with get_db() as db:
+                users = db.execute(
+                    "SELECT id, name, email FROM users WHERE role='management' AND email<>? "
+                    "ORDER BY name COLLATE NOCASE",
+                    (owner_email,),
+                ).fetchall()
+            self.send_json(200, {"users": [dict(row) for row in users]})
             return
         if path.startswith("/api/"):
             self.send_json(404, {"error": "API endpoint not found."})
@@ -213,8 +236,65 @@ class AttendanceHandler(SimpleHTTPRequestHandler):
             self.record_attendance("check_in")
         elif path == "/api/attendance/check-out":
             self.record_attendance("check_out")
+        elif path == "/api/management/users":
+            self.create_management_user(data)
         else:
             self.send_json(404, {"error": "API endpoint not found."})
+
+    def do_DELETE(self) -> None:
+        if urlparse(self.path).path != "/api/management/users":
+            self.send_json(404, {"error": "API endpoint not found."})
+            return
+        owner = self.require_owner()
+        if not owner:
+            return
+        user_ids = parse_qs(urlparse(self.path).query).get("id", [])
+        try:
+            if len(user_ids) != 1:
+                raise ValueError
+            user_id = int(user_ids[0])
+            if user_id < 1:
+                raise ValueError
+        except ValueError:
+            self.send_json(400, {"error": "A valid management account ID is required."})
+            return
+        owner_email = os.environ.get("ATTENDANCE_ADMIN_EMAIL", "").strip().lower()
+        with get_db() as db:
+            cursor = db.execute(
+                "DELETE FROM users WHERE id=? AND role='management' AND email<>?",
+                (user_id, owner_email),
+            )
+        if cursor.rowcount == 0:
+            self.send_json(404, {"error": "Management account not found."})
+            return
+        self.send_json(200, {"message": "Management account removed."})
+
+    def create_management_user(self, data: dict) -> None:
+        if not self.require_owner():
+            return
+        name = str(data.get("name", "")).strip()
+        email = str(data.get("email", "")).strip().lower()
+        password = str(data.get("password", ""))
+        if not name or len(name) > 120:
+            self.send_json(400, {"error": "Enter a name up to 120 characters."})
+            return
+        if len(email) > 254 or "@" not in email or "." not in email.rsplit("@", 1)[-1]:
+            self.send_json(400, {"error": "Enter a valid email address."})
+            return
+        if not 8 <= len(password) <= 20 or not password.isascii() or not password.isalnum():
+            self.send_json(400, {"error": "Password must be 8-20 letters and numbers."})
+            return
+        try:
+            with get_db() as db:
+                db.execute(
+                    "INSERT INTO users(name, email, password_hash, role, created_at) "
+                    "VALUES (?, ?, ?, 'management', ?)",
+                    (name, email, password_hash(password), iso_time()),
+                )
+        except sqlite3.IntegrityError:
+            self.send_json(409, {"error": "An account with this email already exists."})
+            return
+        self.send_json(201, {"message": "Management account created."})
 
     def signup(self, data: dict) -> None:
         name = str(data.get("name", "")).strip()

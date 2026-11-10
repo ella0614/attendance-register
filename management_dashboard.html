@@ -14,6 +14,7 @@
                 <a class="active" href="#overview">Overview</a>
                 <a href="#attendance">Attendance</a>
                 <a href="#reports">Reports</a>
+                <a href="#managementAccountsPanel" id="managementAccountsLink" hidden>Management accounts</a>
             </nav>
         </aside>
 
@@ -55,6 +56,7 @@
                         <thead>
                             <tr>
                                 <th>Name</th>
+                                <th>Email</th>
                                 <th>Status</th>
                                 <th>Check in</th>
                                 <th>Check out</th>
@@ -68,12 +70,41 @@
                     <div class="panel-title-row">
                         <h2>Overview</h2>
                     </div>
-                    <ul class="info-list">
-                        <li>Morning check-in is stable.</li>
-                        <li>Two staff members need reminders.</li>
-                        <li>One employee is marked absent.</li>
-                        <li>Attendance is tracking well this week.</li>
+                    <ul class="info-list" id="managementReportSummary" aria-live="polite">
+                        <li>Loading attendance summary…</li>
                     </ul>
+                </div>
+            </section>
+
+            <section class="panel management-accounts-panel" id="managementAccountsPanel" hidden>
+                <div class="panel-title-row">
+                    <h2>Management accounts</h2>
+                </div>
+                <p class="management-accounts-help">Only the configured account owner can add or remove management access. Each manager uses their own login.</p>
+                <form id="managementAccountForm" class="management-accounts-form">
+                    <div>
+                        <label for="managerName">Full name</label>
+                        <input id="managerName" name="name" type="text" maxlength="120" autocomplete="name" required>
+                    </div>
+                    <div>
+                        <label for="managerEmail">Email address</label>
+                        <input id="managerEmail" name="email" type="email" maxlength="254" autocomplete="email" required>
+                    </div>
+                    <div>
+                        <label for="managerPassword">Temporary password</label>
+                        <input id="managerPassword" name="password" type="password" minlength="8" maxlength="20" pattern="[A-Za-z0-9]{8,20}" autocomplete="new-password" required>
+                    </div>
+                    <button class="management-account-button" type="submit">Add manager</button>
+                </form>
+                <p class="management-accounts-help">Passwords must be 8–20 letters and numbers. Share each manager’s temporary password privately.</p>
+                <p id="managementAccountMessage" class="signup-message" role="status" aria-live="polite"></p>
+                <div class="management-accounts-table">
+                    <table>
+                        <thead>
+                            <tr><th>Name</th><th>Email</th><th>Access</th></tr>
+                        </thead>
+                        <tbody id="managementAccountRows"></tbody>
+                    </table>
                 </div>
             </section>
         </main>

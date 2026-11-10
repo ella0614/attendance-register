@@ -159,11 +159,22 @@ async function loadStaffDashboard(user) {
     await refresh();
 }
 
-async function loadManagementDashboard() {
+async function loadManagementDashboard(user) {
     const data = await apiRequest("/api/management/attendance");
     document.getElementById("totalStaffCount").textContent = data.totalStaff;
     document.getElementById("presentStaffCount").textContent = data.present;
     document.getElementById("absentStaffCount").textContent = data.absent;
+    const summary = document.getElementById("managementReportSummary");
+    summary.replaceChildren();
+    [
+        `${data.totalStaff} staff member(s) registered.`,
+        `${data.present} staff member(s) checked in today.`,
+        `${data.absent} staff member(s) have not checked in today.`
+    ].forEach(function (text) {
+        const item = document.createElement("li");
+        item.textContent = text;
+        summary.appendChild(item);
+    });
     const rows = document.getElementById("managementAttendanceRows");
     rows.replaceChildren();
     data.staff.forEach(function (staff) {
@@ -175,6 +186,77 @@ async function loadManagementDashboard() {
         addCell(row, formatTime(staff.checkOut));
         rows.appendChild(row);
     });
+
+    const accountsPanel = document.getElementById("managementAccountsPanel");
+    const accountsLink = document.getElementById("managementAccountsLink");
+    if (!user.isOwner || !accountsPanel) return;
+    accountsPanel.hidden = false;
+    if (accountsLink) accountsLink.hidden = false;
+
+    const accountForm = document.getElementById("managementAccountForm");
+    const accountMessage = document.getElementById("managementAccountMessage");
+    const accountRows = document.getElementById("managementAccountRows");
+
+    async function refreshManagementAccounts() {
+        const result = await apiRequest("/api/management/users");
+        accountRows.replaceChildren();
+        result.users.forEach(function (manager) {
+            const row = document.createElement("tr");
+            addCell(row, manager.name);
+            addCell(row, manager.email);
+            const actionCell = document.createElement("td");
+            const removeButton = document.createElement("button");
+            removeButton.type = "button";
+            removeButton.className = "management-account-button danger";
+            removeButton.textContent = "Revoke";
+            removeButton.addEventListener("click", async function () {
+                if (!window.confirm(`Remove management access for ${manager.name}?`)) return;
+                removeButton.disabled = true;
+                try {
+                    await apiRequest(`/api/management/users?id=${manager.id}`, { method: "DELETE" });
+                    setMessage(accountMessage, "Management access removed.", true);
+                    await refreshManagementAccounts();
+                } catch (error) {
+                    setMessage(accountMessage, error.message);
+                    removeButton.disabled = false;
+                }
+            });
+            actionCell.appendChild(removeButton);
+            row.appendChild(actionCell);
+            accountRows.appendChild(row);
+        });
+    }
+
+    accountForm.addEventListener("submit", async function (event) {
+        event.preventDefault();
+        const name = document.getElementById("managerName").value.trim();
+        const email = document.getElementById("managerEmail").value.trim().toLowerCase();
+        const password = document.getElementById("managerPassword").value;
+        const validationError = validateInput(email, password);
+        if (!name) return setMessage(accountMessage, "Please enter the manager's name.");
+        if (validationError) return setMessage(accountMessage, validationError);
+        const button = accountForm.querySelector('button[type="submit"]');
+        button.disabled = true;
+        try {
+            const result = await apiRequest("/api/management/users", {
+                method: "POST",
+                body: JSON.stringify({ name, email, password })
+            });
+            accountForm.reset();
+            await refreshManagementAccounts();
+            setMessage(accountMessage, result.message, true);
+        } catch (error) {
+            setMessage(accountMessage, error.message);
+        } finally {
+            button.disabled = false;
+        }
+    });
+
+    try {
+        await refreshManagementAccounts();
+    } catch (error) {
+        setMessage(accountMessage, error.message);
+    }
 }
 
 async function initializeDashboard() {
@@ -186,7 +268,7 @@ async function initializeDashboard() {
         if (staffPage && result.user.role !== "staff") return window.location.replace("staff.html");
         if (managementPage && result.user.role !== "management") return window.location.replace("management.html");
         if (staffPage) await loadStaffDashboard(result.user);
-        if (managementPage) await loadManagementDashboard();
+        if (managementPage) await loadManagementDashboard(result.user);
     } catch (error) {
         window.location.replace(staffPage ? "staff.html" : "management.html");
     }
